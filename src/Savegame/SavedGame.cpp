@@ -20,7 +20,9 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 #include <yaml-cpp/yaml.h>
+#include "../Engine/Logger.h"
 #include "../Ruleset/Ruleset.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Language.h"
@@ -43,6 +45,10 @@
 #include "../Ruleset/RuleManufacture.h"
 #include "Production.h"
 #include "TerrorSite.h"
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 namespace OpenXcom
 {
@@ -83,7 +89,7 @@ bool equalProduction::operator()(const Production * p) const
 /**
  * Initializes a brand new saved game according to the specified difficulty.
  */
-SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _funds(0), _battleGame(0), _debug(false)
+SavedGame::SavedGame() : _difficulty(DIFF_BEGINNER), _funds(0), _globeLon(0.0), _globeLat(0.0), _globeZoom(0), _battleGame(0), _debug(false)
 {
 	RNG::init();
 	_time = new GameTime(6, 1, 1, 1999, 12, 0, 0);
@@ -155,17 +161,26 @@ void SavedGame::getList(TextList *list, Language *lang)
 			saveDay << time.getDay() << lang->getString(time.getDayString());
 			saveMonth << lang->getString(time.getMonthString());
 			saveYear << time.getYear();
-			list->addRow(5, Language::utf8ToWstr(file.substr(0, file.length()-4)).c_str(), Language::utf8ToWstr(saveTime.str()).c_str(), saveDay.str().c_str(), saveMonth.str().c_str(), saveYear.str().c_str());
+
+			std::string s = file.substr(0, file.length()-4);
+#ifdef _MSC_VER
+			int size = MultiByteToWideChar(CP_ACP, 0, &s[0], (int)s.size(), NULL, 0);
+			std::wstring wstr(size, 0);
+			MultiByteToWideChar(CP_ACP, 0, &s[0], (int)s.size(), &wstr[0], size);
+#else
+			std::wstring wstr = Language::utf8ToWstr(s);
+#endif
+			list->addRow(5, wstr.c_str(), Language::utf8ToWstr(saveTime.str()).c_str(), saveDay.str().c_str(), saveMonth.str().c_str(), saveYear.str().c_str());
 			fin.close();
 		}
 		catch (Exception &e)
 		{
-			std::cerr << e.what() << std::endl;
+			Log(LOG_ERROR) << e.what();
 			continue;
 		}
 		catch (YAML::Exception &e)
 		{
-			std::cerr << e.what() << std::endl;
+			Log(LOG_ERROR) << e.what();
 			continue;
 		}
 	}
@@ -180,7 +195,14 @@ void SavedGame::getList(TextList *list, Language *lang)
 void SavedGame::load(const std::string &filename, Ruleset *rule)
 {
 	std::string s = Options::getUserFolder() + filename + ".sav";
+#ifdef _MSC_VER
+	int size = MultiByteToWideChar(CP_UTF8, 0, &s[0], (int)s.size(), NULL, 0);
+    std::wstring wstr(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, &s[0], (int)s.size(), &wstr[0], size);
+	std::ifstream fin(wstr);
+#else
 	std::ifstream fin(s.c_str());
+#endif
 	if (!fin)
 	{
 		throw Exception("Failed to load savegame");
@@ -192,7 +214,7 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
 	parser.GetNextDocument(doc);
 	std::string v;
 	doc["version"] >> v;
-	if (v.substr(0, 3) != Options::getVersion().substr(0, 3))
+	if (v != Options::getVersion())
 	{
 		throw Exception("Version mismatch");
 	}
@@ -204,6 +226,9 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
 	doc["difficulty"] >> a;
 	_difficulty = (GameDifficulty)a;
 	doc["funds"] >> _funds;
+	doc["globeLon"] >> _globeLon;
+	doc["globeLat"] >> _globeLat;
+	doc["globeZoom"] >> _globeZoom;
 	doc["ids"] >> _ids;
 
 	for (YAML::Iterator i = doc["countries"].begin(); i != doc["countries"].end(); ++i)
@@ -277,7 +302,14 @@ void SavedGame::load(const std::string &filename, Ruleset *rule)
 void SavedGame::save(const std::string &filename) const
 {
 	std::string s = Options::getUserFolder() + filename + ".sav";
+#ifdef _MSC_VER
+	int size = MultiByteToWideChar(CP_UTF8, 0, &s[0], (int)s.size(), NULL, 0);
+    std::wstring wstr(size, 0);
+    MultiByteToWideChar(CP_UTF8, 0, &s[0], (int)s.size(), &wstr[0], size);
+	std::ofstream sav(wstr);
+#else
 	std::ofstream sav(s.c_str());
+#endif
 	if (!sav)
 	{
 		throw Exception("Failed to save savegame");
@@ -297,6 +329,9 @@ void SavedGame::save(const std::string &filename) const
 	out << YAML::BeginMap;
 	out << YAML::Key << "difficulty" << YAML::Value << _difficulty;
 	out << YAML::Key << "funds" << YAML::Value << _funds;
+	out << YAML::Key << "globeLon" << YAML::Value << _globeLon;
+	out << YAML::Key << "globeLat" << YAML::Value << _globeLat;
+	out << YAML::Key << "globeZoom" << YAML::Value << _globeZoom;
 	out << YAML::Key << "ids" << YAML::Value << _ids;
 	out << YAML::Key << "countries" << YAML::Value;
 	out << YAML::BeginSeq;
@@ -391,6 +426,60 @@ int SavedGame::getFunds() const
 void SavedGame::setFunds(int funds)
 {
 	_funds = funds;
+}
+
+/**
+ * Returns the current longitude of the Geoscape globe.
+ * @return Longitude.
+ */
+double SavedGame::getGlobeLongitude() const
+{
+	return _globeLon;
+}
+
+/**
+ * Changes the current longitude of the Geoscape globe.
+ * @param lon Longitude.
+ */
+void SavedGame::setGlobeLongitude(double lon)
+{
+	_globeLon = lon;
+}
+
+/**
+ * Returns the current latitude of the Geoscape globe.
+ * @return Latitude.
+ */
+double SavedGame::getGlobeLatitude() const
+{
+	return _globeLat;
+}
+
+/**
+ * Changes the current latitude of the Geoscape globe.
+ * @param lat Latitude.
+ */
+void SavedGame::setGlobeLatitude(double lat)
+{
+	_globeLat = lat;
+}
+
+/**
+ * Returns the current zoom level of the Geoscape globe.
+ * @return Zoom level.
+ */
+int SavedGame::getGlobeZoom() const
+{
+	return _globeZoom;
+}
+
+/**
+ * Changes the current zoom level of the Geoscape globe.
+ * @param zoom Zoom level.
+ */
+void SavedGame::setGlobeZoom(int zoom)
+{
+	_globeZoom = zoom;
 }
 
 /**
@@ -714,6 +803,27 @@ void SavedGame::getDependableResearchBasic (std::vector<RuleResearch *> & depend
 			else
 			{
 			}
+		}
+	}
+}
+
+/**
+   Get the list of newly available manufacture projects once a ResearchProject has been completed. This function check for fake ResearchProject.
+   * @param dependables the list of RuleManufacture which are now available.
+   * @param research The RuleResearch which has just been discovered
+   * @param ruleset the Game Ruleset
+   * @param base a pointer to a Base
+*/
+void SavedGame::getDependableManufacture (std::vector<RuleManufacture *> & dependables, const RuleResearch *research, Ruleset * ruleset, Base * base) const
+{
+	std::vector<std::string> mans = ruleset->getManufactureList();
+	for(std::vector<std::string>::const_iterator iter = mans.begin (); iter != mans.end (); ++iter)
+	{
+		RuleManufacture *m = ruleset->getManufacture(*iter);
+		std::vector<std::string> reqs = m->getRequirements();
+		if(isResearched(m->getRequirements()) && std::find(reqs.begin(), reqs.end(), research->getName()) != reqs.end())
+		{
+			dependables.push_back(m);
 		}
 	}
 }

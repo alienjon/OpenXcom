@@ -307,7 +307,8 @@ void BattlescapeGenerator::run()
 			{
 				for (int count=0; count < i->second; count++)
 				{
-					_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()));
+					_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()),
+						_game->getRuleset()->getInventory("STR_GROUND"));
 				}
 			}
 		}
@@ -322,7 +323,8 @@ void BattlescapeGenerator::run()
 				{
 					for (int count=0; count < i->second; count++)
 					{
-						_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()));
+						_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()),
+							_game->getRuleset()->getInventory("STR_GROUND"));
 					}
 					_base->getItems()->removeItem(i->first, i->second);
 				}
@@ -336,7 +338,8 @@ void BattlescapeGenerator::run()
 				{
 					for (int count=0; count < i->second; count++)
 					{
-						_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()));
+						_craftInventoryTile->addItem(new BattleItem(_game->getRuleset()->getItem(i->first), _save->getCurrentItemId()),
+							_game->getRuleset()->getInventory("STR_GROUND"));
 					}
 				}
 			}
@@ -369,6 +372,8 @@ void BattlescapeGenerator::run()
 		deployCivilians(16);
 	}
 
+
+	fuelPowerSources();
 
 	if (_save->getMissionType() ==  "STR_UFO_CRASH_RECOVERY")
 	{
@@ -567,16 +572,12 @@ BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
  */
 BattleItem* BattlescapeGenerator::addItem(BattleItem *item)
 {
-	bool placed = false, loaded = false;
+	bool loaded = false;
 	RuleInventory *righthand = _game->getRuleset()->getInventory("STR_RIGHT_HAND");
 
 	switch (item->getRules()->getBattleType())
 	{
 	case BT_AMMO:
-		if (item->getSlot() == righthand)
-		{
-			placed = true;
-		}
 		break;
 	case BT_GRENADE:
 	case BT_PROXIMITYGRENADE:
@@ -590,7 +591,6 @@ BattleItem* BattlescapeGenerator::addItem(BattleItem *item)
 			{
 				item->moveToOwner((*i));
 				item->setSlot(_game->getRuleset()->getInventory("STR_BELT"));
-				placed = true;
 				break;
 			}
 		}
@@ -621,7 +621,6 @@ BattleItem* BattlescapeGenerator::addItem(BattleItem *item)
 				{
 					item->moveToOwner((*i));
 					item->setSlot(righthand);
-					placed = true;
 					break;
 				}
 			}
@@ -639,24 +638,16 @@ BattleItem* BattlescapeGenerator::addItem(BattleItem *item)
 				item->setSlot(_game->getRuleset()->getInventory("STR_BELT"));
 				item->setSlotX(3);
 				item->setSlotY(0);
-				placed = true;
 				break;
 			}
 		}
 		break;
 	default:
-		placed = false;
 		break;
 	}
 
 	_save->getItems()->push_back(item);
 	item->setXCOMProperty(true);
-
-	// if we did not auto equip the item, place it on the ground
-	if (!placed)
-	{
-		item->setSlot(_game->getRuleset()->getInventory("STR_GROUND"));
-	}
 
 	return item;
 }
@@ -720,7 +711,7 @@ BattleItem* BattlescapeGenerator::addItem(RuleItem *item, BattleUnit *unit)
 	default: break;
 	}
 
-	// if we did not auto equip the item, place it on the ground
+	// if we could not equip the item, delete it
 	if (!placed)
 	{
 		delete bi;
@@ -1030,23 +1021,10 @@ void BattlescapeGenerator::generateMap()
 					_craftInventoryTile = _save->getTile(Position(i*10,(j*10)+5,1));
 				}
 
-				// north
-				if (j > 0 && blocks[i][j-1] != dirt)
+				// drill east
+				if (i < (_width / 10)-1 && blocks[i+1][j] != dirt && _save->getTile(Position((i*10)+9,(j*10)+4,0))->getMapData(MapData::O_OBJECT))
 				{
-					_save->getTile(Position((i*10)+3,j*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
-					_save->getTile(Position((i*10)+4,j*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
-					_save->getTile(Position((i*10)+5,j*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
-				}
-				// west
-				if (i > 0 && blocks[i-1][j] != dirt)
-				{
-					_save->getTile(Position((i*10),(j*10)+3,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
-					_save->getTile(Position((i*10),(j*10)+4,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
-					_save->getTile(Position((i*10),(j*10)+5,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
-				}
-				// east
-				if (i < (_width / 10)-1 && blocks[i+1][j] != dirt)
-				{
+					// remove stuff
 					_save->getTile(Position((i*10)+9,(j*10)+3,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
 					_save->getTile(Position((i*10)+9,(j*10)+3,0))->setMapData(0, 0, 0, MapData::O_OBJECT);
 					_save->getTile(Position((i*10)+9,(j*10)+4,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
@@ -1055,13 +1033,24 @@ void BattlescapeGenerator::generateMap()
 					_save->getTile(Position((i*10)+9,(j*10)+5,0))->setMapData(0, 0, 0, MapData::O_OBJECT);
 					if (_save->getTile(Position((i*10)+9,(j*10)+2,0))->getMapData(MapData::O_OBJECT))
 					{
-						_save->getTile(Position((i*10)+9,(j*10)+3,0))->setMapData(mds->getObjects()->at(ewallfix), ewallfix, ewallfixSet, MapData::O_NORTHWALL); //wallfix
-						_save->getTile(Position((i*10)+9,(j*10)+6,0))->setMapData(mds->getObjects()->at(ewallfix), ewallfix, ewallfixSet, MapData::O_NORTHWALL); //wallfix
+						//wallfix
+						_save->getTile(Position((i*10)+9,(j*10)+3,0))->setMapData(mds->getObjects()->at(ewallfix), ewallfix, ewallfixSet, MapData::O_NORTHWALL);
+						_save->getTile(Position((i*10)+9,(j*10)+6,0))->setMapData(mds->getObjects()->at(ewallfix), ewallfix, ewallfixSet, MapData::O_NORTHWALL);
 					}
+					if (_save->getMissionType() == "STR_ALIEN_BASE_ASSAULT")
+					{
+						//wallcornerfix
+						_save->getTile(Position(((i+1)*10),(j*10)+3,0))->setMapData(mds->getObjects()->at(swallfix+1), swallfix+1, swallfixSet, MapData::O_OBJECT);
+					}
+					// remove more stuff
+					_save->getTile(Position(((i+1)*10),(j*10)+3,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
+					_save->getTile(Position(((i+1)*10),(j*10)+4,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
+					_save->getTile(Position(((i+1)*10),(j*10)+5,0))->setMapData(0, 0, 0, MapData::O_WESTWALL);
 				}
-				// south
-				if (j < (_length / 10)-1 && blocks[i][j+1] != dirt)
+				// drill south
+				if (j < (_length / 10)-1 && blocks[i][j+1] != dirt && _save->getTile(Position((i*10)+4,(j*10)+9,0))->getMapData(MapData::O_OBJECT))
 				{
+					// remove stuff
 					_save->getTile(Position((i*10)+3,(j*10)+9,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
 					_save->getTile(Position((i*10)+3,(j*10)+9,0))->setMapData(0, 0, 0, MapData::O_OBJECT);
 					_save->getTile(Position((i*10)+4,(j*10)+9,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
@@ -1070,9 +1059,19 @@ void BattlescapeGenerator::generateMap()
 					_save->getTile(Position((i*10)+5,(j*10)+9,0))->setMapData(0, 0, 0, MapData::O_OBJECT);
 					if (_save->getTile(Position((i*10)+2,(j*10)+9,0))->getMapData(MapData::O_OBJECT))
 					{
-						_save->getTile(Position((i*10)+3,(j*10)+9,0))->setMapData(mds->getObjects()->at(swallfix), swallfix, swallfixSet, MapData::O_WESTWALL); //wallfix
-						_save->getTile(Position((i*10)+6,(j*10)+9,0))->setMapData(mds->getObjects()->at(swallfix), swallfix, swallfixSet, MapData::O_WESTWALL); //wallfix
+						// wallfix
+						_save->getTile(Position((i*10)+3,(j*10)+9,0))->setMapData(mds->getObjects()->at(swallfix), swallfix, swallfixSet, MapData::O_WESTWALL);
+						_save->getTile(Position((i*10)+6,(j*10)+9,0))->setMapData(mds->getObjects()->at(swallfix), swallfix, swallfixSet, MapData::O_WESTWALL);
 					}
+					if (_save->getMissionType() == "STR_ALIEN_BASE_ASSAULT")
+					{
+						// wallcornerfix
+						_save->getTile(Position((i*10)+3,((j+1)*10),0))->setMapData(mds->getObjects()->at(swallfix+1), swallfix+1, swallfixSet, MapData::O_OBJECT);
+					}
+					// remove more stuff
+					_save->getTile(Position((i*10)+3,(j+1)*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
+					_save->getTile(Position((i*10)+4,(j+1)*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
+					_save->getTile(Position((i*10)+5,(j+1)*10,0))->setMapData(0, 0, 0, MapData::O_NORTHWALL);
 				}
 			}
 		}
@@ -1324,13 +1323,32 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 }
 
 /**
+ * Fill power sources with an elerium-115 object.
+ */
+void BattlescapeGenerator::fuelPowerSources()
+{
+	for (int i = 0; i < _save->getWidth() * _save->getLength() * _save->getHeight(); ++i)
+	{
+		if (_save->getTiles()[i]->getMapData(MapData::O_OBJECT) 
+			&& _save->getTiles()[i]->getMapData(MapData::O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE)
+		{
+			BattleItem *elerium = new BattleItem(_game->getRuleset()->getItem("STR_ELERIUM_115"), _save->getCurrentItemId());
+			_save->getItems()->push_back(elerium);
+			_save->getTiles()[i]->addItem(elerium, _game->getRuleset()->getInventory("STR_GROUND"));
+		}
+	}
+}
+
+
+/**
  * When a UFO crashes, there is a 75% chance for each powersource to explode.
  */
 void BattlescapeGenerator::explodePowerSources()
 {
 	for (int i = 0; i < _save->getWidth() * _save->getLength() * _save->getHeight(); ++i)
 	{
-		if (_save->getTiles()[i]->getMapData(MapData::O_OBJECT) && _save->getTiles()[i]->getMapData(MapData::O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE && RNG::generate(0,100) < 75)
+		if (_save->getTiles()[i]->getMapData(MapData::O_OBJECT) 
+			&& _save->getTiles()[i]->getMapData(MapData::O_OBJECT)->getSpecialType() == UFO_POWER_SOURCE && RNG::generate(0,100) < 75)
 		{
 			Position pos;
 			pos.x = _save->getTiles()[i]->getPosition().x*16;

@@ -21,7 +21,6 @@
 #include "../Engine/Game.h"
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Language.h"
-#include "../Engine/Font.h"
 #include "../Engine/Palette.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
@@ -87,8 +86,8 @@ void ResearchInfoState::buildUi ()
 	_txtAvailableScientist = new Text(width - 2 * button_x_border, button_height, start_x + button_x_border, start_y + 3*button_y_border);
 	_txtAvailableSpace = new Text(width - 2 * button_x_border, button_height, start_x + button_x_border, start_y + 4*button_y_border);
 	_txtAllocatedScientist = new Text(width - 2 * button_x_border, button_height, start_x + button_x_border, start_y + 5*button_y_border);
-	_txtMore = new Text(width - 3 * button_x_border, button_height, start_x + 2.5*button_x_border + 8, start_y + 7*button_y_border);
-	_txtLess = new Text(width - 3 * button_x_border, button_height, start_x + 2.5*button_x_border + 8, start_y + 9*button_y_border);
+	_txtMore = new Text(width - 6 * button_x_border, button_height, start_x + 2.5*button_x_border + 8, start_y + 7*button_y_border);
+	_txtLess = new Text(width - 6 * button_x_border, button_height, start_x + 2.5*button_x_border + 8, start_y + 9*button_y_border);
 	_btnOk = new TextButton(width - 2 * button_x_border , button_height, start_x + button_x_border, start_y + height - button_height - button_y_border);
 
 	_btnMore = new ArrowButton(ARROW_BIG_UP, button_x_border - 3, button_height - 2, start_x + 10*button_x_border, start_y + 7*button_y_border);
@@ -185,7 +184,7 @@ void ResearchInfoState::SetAssignedScientist()
  */
 void ResearchInfoState::morePress(Action *action)
 {
-	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)	_timerMore->start();
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT) _timerMore->start();
 }
 
 /**
@@ -194,7 +193,7 @@ void ResearchInfoState::morePress(Action *action)
  */
 void ResearchInfoState::moreRelease(Action *action)
 {
-	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)	_timerMore->stop();
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT) _timerMore->stop();
 }
 
 /**
@@ -205,16 +204,16 @@ void ResearchInfoState::moreClick(Action *action)
 {
 	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
-	  int assigned = _project->getAssigned ();
-	  int freeScientist = _base->getAvailableScientists();
-	  int freeSpaceLab = _base->getFreeLaboratories();
-	  if (freeScientist > 0 && freeSpaceLab > 0)
-	  {
-		  int change=std::min(freeScientist, freeSpaceLab);
-      _project->setAssigned(assigned+=change);
-		  _base->setScientists(_base->getScientists()-change);
-		  SetAssignedScientist();
-	  }
+		int assigned = _project->getAssigned ();
+		int freeScientist = _base->getAvailableScientists();
+		int freeSpaceLab = _base->getFreeLaboratories();
+		if (freeScientist > 0 && freeSpaceLab > 0)
+		{
+			int change=std::min(freeScientist, freeSpaceLab);
+			_project->setAssigned(assigned+=change);
+			_base->setScientists(_base->getScientists()-change);
+			SetAssignedScientist();
+		}
 	}
 }
 
@@ -224,7 +223,7 @@ void ResearchInfoState::moreClick(Action *action)
  */
 void ResearchInfoState::lessPress(Action *action)
 {
-	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)	_timerLess->start ();
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT) _timerLess->start ();
 }
 
 /**
@@ -233,7 +232,7 @@ void ResearchInfoState::lessPress(Action *action)
  */
 void ResearchInfoState::lessRelease(Action *action)
 {
-	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)	_timerLess->stop ();
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT) _timerLess->stop ();
 }
 
 /**
@@ -244,13 +243,13 @@ void ResearchInfoState::lessClick(Action *action)
 {
 	if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
 	{
-	  int assigned = _project->getAssigned();
-	  if (assigned > 0)
-	  {
-		  _project->setAssigned(0);
-		  _base->setScientists(_base->getScientists()+assigned);
-		  SetAssignedScientist();
-	  }
+		int assigned = _project->getAssigned();
+		if (assigned > 0)
+		{
+			_project->setAssigned(0);
+			_base->setScientists(_base->getScientists()+assigned);
+			SetAssignedScientist();
+		}
 	}
 }
 

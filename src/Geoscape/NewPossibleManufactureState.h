@@ -16,51 +16,40 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM__SAVEGAMESTATE_H
-#define OPENXCOM__SAVEGAMESTATE_H
+#ifndef OPENXCOM_NEWPOSSIBLEMANUFACTURESTATE
+#define OPENXCOM_NEWPOSSIBLEMANUFACTURESTATE
 
-#include <string>
 #include "../Engine/State.h"
-
 namespace OpenXcom
 {
-
-class TextButton;
+class Game;
 class Window;
+class TextButton;
 class Text;
+class Base;
 class TextList;
-class TextEdit;
+class RuleManufacture;
 
 /**
- * Save Game screen for listing info on available
- * saved games and saving them.
+   Window which inform the player of new possible manufacture projects.
+   Also allow to go to the ManufactureState to dispatch available engineers.
  */
-class SaveGameState : public State
+class NewPossibleManufactureState : public State
 {
-private:
-	TextButton *_btnCancel;
 	Window *_window;
-	Text *_txtTitle, *_txtName, *_txtTime, *_txtDate;
-	TextList *_lstSaves;
-	TextEdit *_edtSave;
-	std::string _selected;
-	bool _geo;
-	int _previousSelectedRow, _selectedRow;
+	Text *_txtTitle;
+	TextList * _lstPossibilities;
+    TextButton *_btnManufacture, *_btnOk;
+	Base * _base;
 public:
-	/// Creates the Save Game state.
-	SaveGameState(Game *game, bool geo);
-	/// Cleans up the Save Game state.
-	~SaveGameState();
+	/// Creates the NewPossibleManufacture state.
+	NewPossibleManufactureState(Game * game, Base * base, const std::vector<RuleManufacture *> & possibilities);
 	/// Updates the palette.
 	void init();
-	/// Handler for clicking the Cancel button.
-	void btnCancelClick(Action *action);
-	/// Handler for pressing a key on the Save edit.
-	void edtSaveKeyPress(Action *action);
-	/// Handler for clicking the Saves list.
-	void lstSavesClick(Action *action);
+	/// Handler for clicking the OK button.
+	void btnOkClick(Action *action);
+	/// Handler for clicking the Allocate Manufacture button.
+	void btnManufactureClick(Action *action);
 };
-
 }
-
 #endif

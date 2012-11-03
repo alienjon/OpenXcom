@@ -19,12 +19,14 @@
 
 #include "Options.h"
 #include <SDL_mixer.h>
+#include <iostream>
 #include <map>
 #include <sstream>
 #include <fstream>
-#include <iostream>
+#include <algorithm>
 #include <yaml-cpp/yaml.h>
 #include "Exception.h"
+#include "Logger.h"
 #include "CrossPlatform.h"
 
 namespace OpenXcom
@@ -65,6 +67,10 @@ void createDefault()
 	setString("language", "");
 	setInt("battleScrollSpeed", 24); // 8, 16, 24, 32, 40
 	setInt("battleScrollType", SCROLL_AUTO);
+	setString("battleScrollButton", "RMB"); // RMB, MMB, None  (Right-Mouse-Button, Middle-Mouse-Button, None)
+	setString("battleScrollButtonInvertMode", "Normal"); // Normal, Inverted
+	setInt("battleScrollButtonTimeTolerancy", 300); // miliSecond
+	setInt("battleScrollButtonPixelTolerancy", 10); // count of pixels
 	setInt("battleFireSpeed", 20); // 30, 25, 20, 15, 10, 5
 	setInt("battleXcomSpeed", 40); // 60, 50, 40, 30, 20, 10
 	setInt("battleAlienSpeed", 40); // 60, 50, 40, 30, 20, 10
@@ -90,24 +96,38 @@ void loadArgs(int argc, char** args)
 {
 	for (int i = 1; i < argc; ++i)
 	{
-		if (argc > i + 1)
+		std::string arg = args[i];
+		if ((arg[0] == '-' || arg[0] == '/') && arg.length() > 1)
 		{
-			std::string arg = args[i];
-			if (arg[0] == '-' && argc > i + 1)
+			std::string argname;
+			if (arg[1] == '-' && arg.length() > 2)
+				argname = arg.substr(2, arg.length()-1);
+			else
+				argname = arg.substr(1, arg.length()-1);
+			std::transform(argname.begin(), argname.end(), argname.begin(), ::tolower);
+			if (argc > i + 1)
 			{
-				std::map<std::string, std::string>::iterator it = _options.find(arg.substr(1, arg.length()-1));
+				std::map<std::string, std::string>::iterator it = _options.find(argname);
 				if (it != _options.end())
 				{
 					it->second = args[i+1];
 				}
-				else if (arg == "-data")
+				else if (argname == "data")
 				{
 					_dataFolder = CrossPlatform::endPath(args[i+1]);
 				}
-				else if (arg == "-user")
+				else if (argname == "user")
 				{
 					_userFolder = CrossPlatform::endPath(args[i+1]);
 				}
+				else
+				{
+					Log(LOG_WARNING) << "Unknown option: " << argname;
+				}
+			}
+			else
+			{
+				Log(LOG_WARNING) << "Unknown option: " << argname;
 			}
 		}
 	}
@@ -117,16 +137,60 @@ void loadArgs(int argc, char** args)
 	}
 }
 
+/*
+ * Displays command-line help when appropriate.
+ * @param argc Number of arguments.
+ * @param args Array of argument strings.
+ */
+bool showHelp(int argc, char** args)
+{
+	std::stringstream help;
+	help << "OpenXcom v" << Options::getVersion() << std::endl;
+	help << "Usage: openxcom [OPTION]..." << std::endl << std::endl;
+	help << "-data PATH" << std::endl;
+	help << "        use PATH as the default Data Folder instead of auto-detecting" << std::endl << std::endl;
+	help << "-user PATH" << std::endl;
+	help << "        use PATH as the default User Folder instead of auto-detecting" << std::endl << std::endl;
+	help << "-KEY VALUE" << std::endl;
+	help << "        set option KEY to VALUE instead of default/loaded value (eg. -displayWidth 640)" << std::endl << std::endl;
+	help << "-help" << std::endl;
+	help << "-?" << std::endl;
+	help << "        show command-line help" << std::endl;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string arg = args[i];
+		if ((arg[0] == '-' || arg[0] == '/') && arg.length() > 1)
+		{
+			std::string argname;
+			if (arg[1] == '-' && arg.length() > 2)
+				argname = arg.substr(2, arg.length()-1);
+			else
+				argname = arg.substr(1, arg.length()-1);
+			std::transform(argname.begin(), argname.end(), argname.begin(), ::tolower);
+			if (argname == "help" || argname == "?")
+			{
+				std::cout << help.str();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 /**
  * Handles the initialization of setting up default options
  * and finding and loading any existing ones.
  * @param argc Number of arguments.
  * @param args Array of argument strings.
  */
-void init(int argc, char** args)
+bool init(int argc, char** args)
 {
-	std::cout << "Loading options..." << std::endl;
+	if (showHelp(argc, args))
+		return false;
+	Log(LOG_INFO) << "Starting OpenXcom...";
+	Log(LOG_INFO) << "-------------------------";
 	createDefault();
+	Log(LOG_INFO) << "Loading options...";
 	loadArgs(argc, args);
 	if (_dataFolder == "")
 	{
@@ -177,10 +241,15 @@ void init(int argc, char** args)
 			save();
 		}
 	}
-	std::cout << "Data folder is: " << _dataFolder << std::endl;
-	std::cout << "User folder is: " << _userFolder << std::endl;
-	std::cout << "Config folder is: " << _configFolder << std::endl;
-	std::cout << "Options loaded successfully." << std::endl;
+	Log(LOG_INFO) << "Data folder is: " << _dataFolder;
+	for (std::vector<std::string>::iterator i = _dataList.begin(); i != _dataList.end(); ++i)
+	{
+		Log(LOG_INFO) << *i;
+	}
+	Log(LOG_INFO) << "User folder is: " << _userFolder;
+	Log(LOG_INFO) << "Config folder is: " << _configFolder;
+	Log(LOG_INFO) << "Options loaded successfully.";
+	return true;
 }
 
 /**

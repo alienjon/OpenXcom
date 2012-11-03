@@ -70,7 +70,7 @@ private:
 	std::vector<BattleUnit *> _visibleUnits;
 	std::vector<Tile *> _visibleTiles;
 	int _tu, _energy, _health, _morale, _stunlevel;
-	bool _kneeled, _dontReselect;
+	bool _kneeled, _floating, _dontReselect;
 	int _currentArmor[5];
 	int _fatalWounds[6];
 	int _fire;
@@ -93,7 +93,7 @@ private:
 	std::wstring _name;
 	UnitStats _stats;
 	int _standHeight, _kneelHeight, _loftemps;
-	int _value, _deathSound;
+	int _value, _deathSound, _moveSound;
 	int _intelligence, _aggression;
 	SpecialAbility _specab;
 	Armor *_armor;
@@ -129,7 +129,7 @@ public:
 	/// Gets the unit's status.
 	UnitStatus getStatus() const;
 	/// Start the walkingPhase
-	void startWalking(int direction, const Position &destination);
+	void startWalking(int direction, const Position &destination, Tile *destinationTile);
 	/// Increase the walkingPhase
 	void keepWalking();
 	/// Gets the walking phase for animation and sound
@@ -158,6 +158,8 @@ public:
 	void kneel(bool kneeled);
 	/// Is kneeled?
 	bool isKneeled() const;
+	/// Is floating?
+	bool isFloating() const;
 	/// Aim.
 	void aim(bool aiming);
 	/// Gets the unit's time units.
@@ -300,6 +302,8 @@ public:
 	int getValue() const;
 	/// Get the unit's death sound.
 	int getDeathSound() const;
+	/// Get the unit's move sound.
+	int getMoveSound() const;
 	/// Get whether the unit is affected by fatal wounds.
 	bool isWoundable() const;
 	/// Get whether the unit is affected by fear.
