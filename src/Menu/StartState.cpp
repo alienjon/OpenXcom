@@ -113,8 +113,7 @@ void StartState::think()
 		_load = LOADING_STARTED;
 		break;
 	case LOADING_SUCCESSFUL:
-		Log(LOG_INFO) << "-------------------------";
-		Log(LOG_INFO) << "OpenXcom started successfully. Enjoy!";
+		Log(LOG_INFO) << "OpenXcom started successfully!";
 		if (Options::getString("language") == "" || Options::getString("language") == "~")
 		{
 			_game->setState(new NoteState(_game));
@@ -126,7 +125,7 @@ void StartState::think()
 				_game->loadLanguage(Options::getString("language"));
 				_game->setState(new MainMenuState(_game));
 			}
-			catch (Exception e)
+			catch (Exception &e)
 			{
 				_game->setState(new LanguageState(_game));
 			}

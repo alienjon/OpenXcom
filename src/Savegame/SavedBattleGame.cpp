@@ -44,7 +44,7 @@ namespace OpenXcom
 /**
  * Initializes a brand new battlescape saved game.
  */
-SavedBattleGame::SavedBattleGame() : _width(0), _length(0), _height(0), _tiles(), _selectedUnit(0), _nodes(), _units(), _items(), _pathfinding(0), _tileEngine(0), _missionType(""), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _debugMode(false), _aborted(false), _itemId(0)
+SavedBattleGame::SavedBattleGame() : _width(0), _length(0), _height(0), _tiles(), _selectedUnit(0), _lastSelectedUnit(0), _nodes(), _units(), _items(), _pathfinding(0), _tileEngine(0), _missionType(""), _globalShade(0), _side(FACTION_PLAYER), _turn(1), _debugMode(false), _aborted(false), _itemId(0)
 {
 	std::string temp;
 	temp = Options::getString("battleScrollButton");
@@ -1107,7 +1107,8 @@ bool SavedBattleGame::setUnitPosition(BattleUnit *bu, const Position &position, 
 	{
 		for (int y = size; y >= 0; y--)
 		{
-			if (getTile(position + Position(x,y,0))->getUnit() != 0 && getTile(position + Position(x,y,0))->getUnit() != bu)
+			Tile *t = getTile(position + Position(x,y,0));
+			if (t == 0 || (t->getUnit() != 0 && t->getUnit() != bu))
 			{
 				return false;
 			}

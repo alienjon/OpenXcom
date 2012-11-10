@@ -118,6 +118,7 @@ NewBattleState::NewBattleState(Game *game) : State(game), _craft(0)
 	_missionTypes = _game->getRuleset()->getDeploymentsList();
 	//TODO: Figure out how to generate base defenses
 	_missionTypes.pop_back();
+	_missionTypes.pop_back();
 
 	_selTerrain = 0;
 	_terrainTypes.push_back("STR_FARM");
@@ -128,9 +129,9 @@ NewBattleState::NewBattleState(Game *game) : State(game), _craft(0)
 	_terrainTypes.push_back("STR_POLAR");
 
 	_selAlien = 0;
-	//_alienRaces = _game->getRuleset()->getAlienRacesList();
-	_alienRaces.push_back("STR_SECTOID");
-	_alienRaces.push_back("STR_FLOATER");
+	_alienRaces = _game->getRuleset()->getAlienRacesList();
+	//_alienRaces.push_back("STR_SECTOID");
+	//_alienRaces.push_back("STR_FLOATER");
 
 	_selDifficulty = 0;
 	_difficulty.push_back("STR_1_BEGINNER");

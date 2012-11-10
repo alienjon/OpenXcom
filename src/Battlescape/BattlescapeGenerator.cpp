@@ -63,16 +63,9 @@ namespace OpenXcom
  * Sets up a BattlescapeGenerator.
  * @param game pointer to Game object.
  */
-BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game)
+BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getBattleGame()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _terror(0), _terrain(0),
+														 _width(0), _length(0), _height(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0)
 {
-	_save = _game->getSavedGame()->getBattleGame();
-	_res = _game->getResourcePack();
-	_ufo = 0;
-	_craft = 0;
-	_base = 0;
-	_terror = 0;
-	_terrain = 0;
-	_craftInventoryTile = 0;
 }
 
 /**
@@ -466,8 +459,13 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 	for (std::vector<DeploymentData>::iterator d = deployment->getDeploymentData()->begin(); d != deployment->getDeploymentData()->end(); ++d)
 	{
 		std::string alienName = race->getMember((*d).alienRank);
-		// TODO: make this depend on difficulty level
-		int quantity = (*d).lowQty + RNG::generate(0, (*d).dQty);
+
+		int quantity = (*d).lowQty + RNG::generate(0, (*d).dQty); // beginner/experienced
+		if( _game->getSavedGame()->getDifficulty() > DIFF_EXPERIENCED )
+			quantity = (*d).lowQty+(((*d).highQty-(*d).lowQty)/2) + RNG::generate(0, (*d).dQty); // veteran/genius
+		else if( _game->getSavedGame()->getDifficulty() > DIFF_GENIUS )
+			quantity = (*d).highQty + RNG::generate(0, (*d).dQty); // super
+
 		for (int i = 0; i < quantity; i++)
 		{
 			bool outside = RNG::generate(0,99) < (*d).percentageOutsideUfo;
@@ -483,7 +481,7 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 				}
 			}
 			// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
-			if ((*d).alienRank == AR_TERRORIST)
+			if ((*d).alienRank == AR_TERRORIST || (*d).alienRank == AR_TERRORIST2)
 			{
 				std::stringstream terroristWeapon;
 				terroristWeapon << alienName;

@@ -16,35 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RNG_H
-#define OPENXCOM_RNG_H
+#ifndef OPENXCOM_PLACESTARTFACILITYSTATE_H
+#define OPENXCOM_PLACESTARTFACILITYSTATE_H
 
-#include <yaml-cpp/yaml.h>
+#include "PlaceFacilityState.h"
+#include "SelectStartFacilityState.h"
 
 namespace OpenXcom
 {
 
+class Globe;
+
 /**
- * Random Number Generator used throughout the game
- * for all your randomness needs. It's really just the
- * standard C generator, but wrapped in a way that we
- * can store its seed for later use if necessary.
+ * Window shown when the player tries to
+ * build a facility.
  */
-namespace RNG
+class PlaceStartFacilityState : public PlaceFacilityState
 {
-	/// Initializes the generator.
-	void init(long count = -1, unsigned int seed = 0);
-	/// Loads the RNG from YAML.
-	void load(const YAML::Node& node);
-	/// Saves the RNG to YAML.
-	void save(YAML::Emitter& out);
-	/// Generates a random integer number.
-	int generate(int min, int max);
-	/// Generates a random decimal number.
-	double generate(double min, double max);
-	/// Get normally distributed value.
-	double boxMuller(double m = 0, double s = 1);
-}
+private:
+	Globe *_globe;
+	SelectStartFacilityState *_select;
+
+public:
+	/// Creates the Place Facility state.
+	PlaceStartFacilityState(Game *game, Base *base, SelectStartFacilityState *select, RuleBaseFacility *rule);
+	/// Cleans up the Place Facility state.
+	~PlaceStartFacilityState();
+	/// Handler for clicking the base view.
+	void viewClick(Action *action);
+};
 
 }
 

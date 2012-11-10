@@ -1107,6 +1107,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Battlescape\PathfindingOpenSet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Battlescape\PathfindingOpenSet.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Battlescape\PatrolBAIState.cpp"
 				>
 			</File>
@@ -1647,19 +1655,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Menu\SaveState.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Menu\SaveState.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Menu\SavedGameState.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Menu\SavedGameState.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Menu\SaveState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Menu\SaveState.h"
 				>
 			</File>
 			<File
@@ -2140,7 +2148,23 @@
 			>
 		</File>
 		<File
+			RelativePath=".\Basescape\PlaceStartFacilityState.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Basescape\PlaceStartFacilityState.h"
+			>
+		</File>
+		<File
 			RelativePath=".\resource.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Basescape\SelectStartFacilityState.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\Basescape\SelectStartFacilityState.h"
 			>
 		</File>
 		<File

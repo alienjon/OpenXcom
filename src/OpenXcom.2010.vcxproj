@@ -212,9 +212,11 @@
     <ClCompile Include="Basescape\PlaceFacilityState.cpp" />
     <ClCompile Include="Basescape\PlaceLiftState.cpp" />
     <ClCompile Include="Basescape\ManufactureStartState.cpp" />
+    <ClCompile Include="Basescape\PlaceStartFacilityState.cpp" />
     <ClCompile Include="Basescape\PurchaseState.cpp" />
     <ClCompile Include="Basescape\ResearchInfoState.cpp" />
     <ClCompile Include="Basescape\ResearchState.cpp" />
+    <ClCompile Include="Basescape\SelectStartFacilityState.cpp" />
     <ClCompile Include="Basescape\SellState.cpp" />
     <ClCompile Include="Basescape\SoldierArmorState.cpp" />
     <ClCompile Include="Basescape\SoldierInfoState.cpp" />
@@ -254,6 +256,7 @@
     <ClCompile Include="Battlescape\NextTurnState.cpp" />
     <ClCompile Include="Battlescape\Pathfinding.cpp" />
     <ClCompile Include="Battlescape\PathfindingNode.cpp" />
+    <ClCompile Include="Battlescape\PathfindingOpenSet.cpp" />
     <ClCompile Include="Battlescape\PatrolBAIState.cpp" />
     <ClCompile Include="Battlescape\Position.cpp" />
     <ClCompile Include="Battlescape\PrimeGrenadeState.cpp" />
@@ -431,9 +434,11 @@
     <ClInclude Include="Basescape\PlaceFacilityState.h" />
     <ClInclude Include="Basescape\PlaceLiftState.h" />
     <ClInclude Include="Basescape\ManufactureStartState.h" />
+    <ClInclude Include="Basescape\PlaceStartFacilityState.h" />
     <ClInclude Include="Basescape\PurchaseState.h" />
     <ClInclude Include="Basescape\ResearchInfoState.h" />
     <ClInclude Include="Basescape\ResearchState.h" />
+    <ClInclude Include="Basescape\SelectStartFacilityState.h" />
     <ClInclude Include="Basescape\SellState.h" />
     <ClInclude Include="Basescape\SoldierArmorState.h" />
     <ClInclude Include="Basescape\SoldierInfoState.h" />
@@ -473,6 +478,7 @@
     <ClInclude Include="Battlescape\NextTurnState.h" />
     <ClInclude Include="Battlescape\Pathfinding.h" />
     <ClInclude Include="Battlescape\PathfindingNode.h" />
+    <ClInclude Include="Battlescape\PathfindingOpenSet.h" />
     <ClInclude Include="Battlescape\PatrolBAIState.h" />
     <ClInclude Include="Battlescape\Position.h" />
     <ClInclude Include="Battlescape\PrimeGrenadeState.h" />

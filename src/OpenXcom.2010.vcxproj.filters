@@ -326,6 +326,9 @@
     <ClCompile Include="Battlescape\PathfindingNode.cpp">
       <Filter>Battlescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\PathfindingOpenSet.cpp">
+      <Filter>Battlescape</Filter>
+    </ClCompile>
     <ClCompile Include="Savegame\BattleItem.cpp">
       <Filter>Savegame</Filter>
     </ClCompile>
@@ -647,6 +650,12 @@
     </ClCompile>
     <ClCompile Include="Menu\SavedGameState.cpp">
       <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\SelectStartFacilityState.cpp">
+      <Filter>Basescape</Filter>
+    </ClCompile>
+    <ClCompile Include="Basescape\PlaceStartFacilityState.cpp">
+      <Filter>Basescape</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -978,6 +987,9 @@
     <ClInclude Include="Battlescape\PathfindingNode.h">
       <Filter>Battlescape</Filter>
     </ClInclude>
+    <ClInclude Include="Battlescape\PathfindingOpenSet.h">
+      <Filter>Battlescape</Filter>
+    </ClInclude>
     <ClInclude Include="Savegame\BattleItem.h">
       <Filter>Savegame</Filter>
     </ClInclude>
@@ -1300,6 +1312,12 @@
     </ClInclude>
     <ClInclude Include="Engine\Logger.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\SelectStartFacilityState.h">
+      <Filter>Basescape</Filter>
+    </ClInclude>
+    <ClInclude Include="Basescape\PlaceStartFacilityState.h">
+      <Filter>Basescape</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -16,35 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef OPENXCOM_RNG_H
-#define OPENXCOM_RNG_H
+#ifndef OPENXCOM_SELECTSTARTFACILITYSTATE_H
+#define OPENXCOM_SELECTSTARTFACILITYSTATE_H
 
-#include <yaml-cpp/yaml.h>
+#include "BuildFacilitiesState.h"
 
 namespace OpenXcom
 {
 
+class Globe;
+
 /**
- * Random Number Generator used throughout the game
- * for all your randomness needs. It's really just the
- * standard C generator, but wrapped in a way that we
- * can store its seed for later use if necessary.
+ * Window shown with all the facilities
+ * available to build.
  */
-namespace RNG
+class SelectStartFacilityState : public BuildFacilitiesState
 {
-	/// Initializes the generator.
-	void init(long count = -1, unsigned int seed = 0);
-	/// Loads the RNG from YAML.
-	void load(const YAML::Node& node);
-	/// Saves the RNG to YAML.
-	void save(YAML::Emitter& out);
-	/// Generates a random integer number.
-	int generate(int min, int max);
-	/// Generates a random decimal number.
-	double generate(double min, double max);
-	/// Get normally distributed value.
-	double boxMuller(double m = 0, double s = 1);
-}
+private:
+	Globe *_globe;
+public:
+	/// Creates the Build Facilities state.
+	SelectStartFacilityState(Game *game, Base *base, State *state, Globe *globe, std::vector<RuleBaseFacility*> Facilities);
+	/// Cleans up the Build Facilities state.
+	~SelectStartFacilityState();
+	/// Populate the build option list
+	virtual void PopulateBuildList();
+	/// Handler for clicking the Facilities list.
+	void lstFacilitiesClick(Action *action);
+	/// Handler for when facility actually built
+	void FacilityBuilt();
+};
 
 }
 

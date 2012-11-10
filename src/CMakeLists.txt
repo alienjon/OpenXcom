@@ -63,6 +63,10 @@ set ( basescape_src
   Basescape/ManufactureStartState.cpp
   Basescape/ManufactureInfoState.h
   Basescape/ManufactureInfoState.cpp
+  Basescape/PlaceStartFacilityState.h
+  Basescape/PlaceStartFacilityState.cpp
+  Basescape/SelectStartFacilityState.h
+  Basescape/SelectStartFacilityState.cpp
 )
 
 set ( battlescape_src
@@ -156,6 +160,8 @@ set ( battlescape_src
   Battlescape/BattlescapeGame.h
   Battlescape/CannotReequipState.cpp
   Battlescape/CannotReequipState.h
+  Battlescape/PathfindingOpenSet.cpp
+  Battlescape/PathfindingOpenSet.h
 )
 
 set ( engine_src
